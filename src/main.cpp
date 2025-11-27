@@ -25,11 +25,6 @@ int main() {
 
   while (!WindowShouldClose()) {
     // INPUT
-    HandleBoardClick(boardRect);
-    if (IsKeyPressed(KEY_R)) {
-      ResetBoard();
-      PlaySound(clickButtonSound);
-    }
     Vector2 mousePos = GetMousePosition();
 
     // Reset Button input
@@ -47,7 +42,18 @@ int main() {
       HandlePlayAgainButton(playAgainBtn);
     }
 
+    // Tiles
+    UpdateSelectorPressAnim();
     UpdateTilePressAnim();
+
+    // Device input
+    HandleBoardClick(boardRect);
+    HandleGamepadInput();
+    if (IsKeyPressed(KEY_R) ||
+        IsGamepadButtonPressed(GAMEPAD, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
+      ResetBoard();
+      PlaySound(clickButtonSound);
+    }
 
     // DRAW
     BeginDrawing();
@@ -64,6 +70,7 @@ int main() {
     DrawResetButton(resetBtn, W);
     if (winner != 0)
       DrawPlayAgainButton(playAgainBtn, W);
+    DrawGamepadSelector(boardRect, playAgainBtn, resetBtn);
 
     EndDrawing();
   }

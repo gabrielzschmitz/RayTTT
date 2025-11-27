@@ -2,6 +2,8 @@
 
 float tilePressAnim[3][3] = {0};
 bool tilePressedState[3][3] = {false};
+float selectorPressAnim = 0.0f;
+bool selectorPressed = false;
 
 int board[3][3];
 int current = 1;
@@ -52,6 +54,15 @@ int CheckWinner() {
   return full ? 3 : 0;
 }
 
+void ResetTiles() {
+  for (int r = 0; r < 3; r++) {
+    for (int c = 0; c < 3; c++) {
+      tilePressedState[r][c] = false; // clear press state
+      tilePressAnim[r][c] = 0.0f;     // reset animation
+    }
+  }
+}
+
 void SetTilePressed(int row, int col, bool pressed) {
   tilePressedState[row][col] = pressed;
 }
@@ -73,5 +84,20 @@ void UpdateTilePressAnim() {
           tilePressAnim[r][c] = target;
       }
     }
+  }
+}
+
+void UpdateSelectorPressAnim() {
+  const float speed = 0.2f;
+  float target = selectorPressed ? 0.5f : 0.0f;
+
+  if (selectorPressAnim < target) {
+    selectorPressAnim += speed;
+    if (selectorPressAnim > target)
+      selectorPressAnim = target;
+  } else if (selectorPressAnim > target) {
+    selectorPressAnim -= speed;
+    if (selectorPressAnim < target)
+      selectorPressAnim = target;
   }
 }

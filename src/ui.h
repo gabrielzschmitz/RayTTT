@@ -7,6 +7,7 @@
 void DrawScoreboard(int screenW);
 void DrawResetButton(Rectangle btn, int screenW);
 void DrawPlayAgainButton(Rectangle btn, int screenW);
+Color MixColors(Color c1, Color c2);
 
 // Reset button UI
 void SetResetButtonPressed(bool pressed);
