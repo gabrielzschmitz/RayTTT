@@ -1,5 +1,6 @@
 #include "input.h"
 #include "game.h"
+#include "sfx.h"
 
 void HandleBoardClick(Rectangle rect) {
   if (winner != 0)
@@ -20,6 +21,7 @@ void HandleBoardClick(Rectangle rect) {
           board[r][c] == 0) {
         board[r][c] = current;
         winner = CheckWinner();
+        PlaySound(clickTileSound);
 
         if (winner == 0)
           current = (current == 1) ? 2 : 1;
@@ -38,6 +40,7 @@ void HandleBoardClick(Rectangle rect) {
 void HandleResetButton(Rectangle btn) {
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
       CheckCollisionPointRec(GetMousePosition(), btn)) {
+    PlaySound(clickButtonSound);
     scoreX = 0;
     scoreO = 0;
     scoreDraw = 0;
@@ -47,6 +50,8 @@ void HandleResetButton(Rectangle btn) {
 
 void HandlePlayAgainButton(Rectangle btn) {
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-      CheckCollisionPointRec(GetMousePosition(), btn))
+      CheckCollisionPointRec(GetMousePosition(), btn)) {
+    PlaySound(clickButtonSound);
     ResetBoard();
+  }
 }

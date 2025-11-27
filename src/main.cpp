@@ -2,7 +2,8 @@
 #include "game.h"
 #include "input.h"
 #include "raylib.h"
-#include "resource_dir.h" // utility header for SearchAndSetResourceDir
+#include "resource_dir.h"
+#include "sfx.h"
 #include "ui.h"
 
 int main() {
@@ -10,7 +11,10 @@ int main() {
   const int H = 850;
 
   InitWindow(W, H, "Tic-Tac-Toe Neon Retro");
-  SetTargetFPS(60);
+  SetTargetFPS(240);
+
+  SearchAndSetResourceDir("resources");
+  InitSfx();
 
   ResetBoard();
 
@@ -22,8 +26,10 @@ int main() {
   while (!WindowShouldClose()) {
     // INPUT
     HandleBoardClick(boardRect);
-    if (IsKeyPressed(KEY_R))
+    if (IsKeyPressed(KEY_R)) {
       ResetBoard();
+      PlaySound(clickButtonSound);
+    }
     Vector2 mousePos = GetMousePosition();
 
     // Reset Button input
@@ -34,10 +40,12 @@ int main() {
     HandleResetButton(resetBtn);
 
     // Play Again Button input
-    bool mouseOverPlayAgain = CheckCollisionPointRec(mousePos, playAgainBtn);
-    SetPlayAgainButtonPressed(mouseOverPlayAgain && mouseDown);
-    UpdatePlayAgainButtonAnim(mouseOverPlayAgain && mouseDown);
-    HandlePlayAgainButton(playAgainBtn);
+    if (winner != 0) {
+      bool mouseOverPlayAgain = CheckCollisionPointRec(mousePos, playAgainBtn);
+      SetPlayAgainButtonPressed(mouseOverPlayAgain && mouseDown);
+      UpdatePlayAgainButtonAnim(mouseOverPlayAgain && mouseDown);
+      HandlePlayAgainButton(playAgainBtn);
+    }
 
     UpdateTilePressAnim();
 
@@ -59,6 +67,8 @@ int main() {
 
     EndDrawing();
   }
+
+  UnloadSfx();
 
   CloseWindow();
   return 0;
