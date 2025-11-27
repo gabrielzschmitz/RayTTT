@@ -6,10 +6,20 @@
 <a href="https://www.buymeacoffee.com/gabrielzschmitz" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 20px !important;width: 87px;" ></a>
 <a href="https://github.com/gabrielzschmitz/RayTTT.C"><img src="https://img.shields.io/github/stars/gabrielzschmitz/RayTTT?style=social" alt="Give me a Star"></a>
 
-**RayTTT** is a classic TicTacToe game implemented in C++ using the
-[raylib](https://www.raylib.com/) framework.  
-It features a clean neon retro aesthetic and runs on all major desktop
-platforms.
+**RayTTT** is a classic TicTacToe game built in C++ using
+[raylib](https://www.raylib.com/). It rocks a clean neon retro style with
+bright colors and smooth animations that make the game fun and easy on the
+eyes.
+
+The gameplay is simple and intuitive -- perfect for a quick solo match or a
+friendly challenge against a buddy. It keeps track of wins and draws so you can
+see who's really winning the friendly rivalry.
+
+It runs smoothly on Windows, Linux, and macOS, so no matter what system you’re
+on, you’re good to go.
+
+Plus, the code is neat and beginner-friendly, making it a great starting point
+if you want to learn game dev with raylib and C++ or just tinker around.
 
 ---
 
@@ -72,14 +82,6 @@ premake command or scripts. Supported targets include:
 - OpenGLES 3.0  
 
 Refer to the [INSTALL.md](INSTALL.md) for command examples.
-
----
-
-## 🧩 Adding External Libraries
-
-TicTacToe keeps dependencies minimal. To add external libraries, modify the
-`build/premake5.lua` file using Premake's `links` function.  
-More info: [Premake Links Documentation](https://premake.github.io/docs/links/)
 
 ---
 
