@@ -83,8 +83,8 @@ void DrawBoard(Rectangle rect) {
 }
 
 void DrawTitle(int screenW) {
-  DrawCenteredText("TIC-TAC-TOE", 30, 60, (Color){255, 0, 200, 255}, screenW);
-  DrawCenteredText("NEON RETRO", 90, 20, GRAY, screenW);
+  DrawCenteredText("RAY TTT", 30, 60, (Color){255, 0, 200, 255}, screenW);
+  DrawCenteredText("a c++ tictactoe", 90, 20, GRAY, screenW);
 }
 
 void DrawStatusText(int screenW) {

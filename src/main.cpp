@@ -7,7 +7,7 @@
 
 int main() {
   const int W = 600;
-  const int H = 900;
+  const int H = 850;
 
   InitWindow(W, H, "Tic-Tac-Toe Neon Retro");
   SetTargetFPS(60);
@@ -16,7 +16,7 @@ int main() {
 
   Rectangle boardRect = {100, 250, 400, 400};
   Rectangle boxRect = {100, 250, 400, 480};
-  Rectangle resetBtn = {(float)W / 2 - 90, 775, 180, 30};
+  Rectangle resetBtn = {(float)W / 2 - 90, 785, 180, 30};
   Rectangle playAgainBtn = {(float)W / 2 - 65, 700, 130, 20};
 
   while (!WindowShouldClose()) {

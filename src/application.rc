@@ -8,11 +8,11 @@ BEGIN
   BEGIN
     BLOCK "040904E4"    // English US
     BEGIN
-      VALUE "FileDescription", "TicTacToe game by gabrielzschmitz"
+      VALUE "FileDescription", "A TicTacToe game by gabrielzschmitz"
       VALUE "FileVersion", "1.0.0"
-      VALUE "InternalName", "tictactoe_game"
+      VALUE "InternalName", "rayttt"
       VALUE "LegalCopyright", "(c) 2025 gabrielzschmitz"
-      VALUE "ProductName", "TicTacToe"
+      VALUE "ProductName", "RayTTT"
       VALUE "ProductVersion", "1.0.0"
     END
   END
