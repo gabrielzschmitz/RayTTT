@@ -51,6 +51,9 @@ int main() {
     HandleGamepadInput();
     if (IsKeyPressed(KEY_R) ||
         IsGamepadButtonPressed(GAMEPAD, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
+      scoreX = 0;
+      scoreO = 0;
+      scoreDraw = 0;
       ResetBoard();
       PlaySound(clickButtonSound);
     }
