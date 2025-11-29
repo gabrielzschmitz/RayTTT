@@ -420,7 +420,7 @@ postbuildcommands({
 -- Windows
 filter({ "system:windows" })
 postbuildcommands({
-	'copy /Y "..\\..\\resources\\icon.png" "%{cfg.targetdir}\\icon.png"',
+	'cmd /c copy /Y "..\\..\\resources\\icon.png" "%{cfg.targetdir}\\icon.png"',
 })
 
 filter({})
