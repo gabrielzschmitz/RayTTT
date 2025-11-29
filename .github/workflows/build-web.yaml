@@ -1,4 +1,4 @@
-name: Build Web (Emscripten)
+name: Build Web
 
 on:
   push:
@@ -25,16 +25,15 @@ jobs:
           source ./emsdk_env.sh
           echo "EMSDK activated"
 
-      - name: Generate Makefiles (with Emscripten flags)
+      - name: Generate project files
         run: |
           source emsdk/emsdk_env.sh
           cd build
           ./premake5 gmake --with-emscripten --graphics=openges2
 
-      - name: Build Web Release
+      - name: Build Web release
         run: |
           source emsdk/emsdk_env.sh
-          cd ..
           emmake make config=release_web
 
       - name: Upload Web build artifacts

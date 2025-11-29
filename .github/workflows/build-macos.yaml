@@ -15,16 +15,14 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install bear premake
 
-      - name: Generate project files (Premake)
+      - name: Generate project files
         run: |
           cd build
           ./premake5.osx gmake
 
       - name: Build Release
         run: |
-          cd ..
           make config=release_x64
 
       - name: Upload macOS binary
