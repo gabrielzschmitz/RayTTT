@@ -411,6 +411,16 @@ if not _OPTIONS["with-emscripten"] then
 	filter({})
 end
 
+-- Linux / macOS
+filter({ "system:linux or system:macosx" })
 postbuildcommands({
 	"{COPY} ../../resources/icon.png %{cfg.targetdir}/icon.png",
 })
+
+-- Windows
+filter({ "system:windows" })
+postbuildcommands({
+	'copy /Y "..\\..\\resources\\icon.png" "%{cfg.targetdir}\\icon.png"',
+})
+
+filter({})
