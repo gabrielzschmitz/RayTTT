@@ -15,7 +15,7 @@ jobs:
       - name: Generate project files
         run: |
           cd build
-          premake5.exe gmake
+          ./premake5.exe gmake
 
       - name: Build Release
         run: |
