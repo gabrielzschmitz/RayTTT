@@ -1,0 +1,38 @@
+name: Build Linux
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential xorg-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev premake4
+          # Install premake5
+          wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-linux.tar.gz
+          tar -xf premake-5.0.0-beta2-linux.tar.gz
+          sudo mv premake5 /usr/local/bin/
+
+      - name: Generate project files
+        run: |
+          cd build
+          ./premake5 gmake
+
+      - name: Build Release
+        run: |
+          cd ..
+          make config=release_x64
+
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: RayTTT-linux
+          path: bin/Release/RayTTT
