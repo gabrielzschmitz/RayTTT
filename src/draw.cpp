@@ -83,7 +83,23 @@ void DrawBoard(Rectangle rect) {
 }
 
 void DrawTitle(int screenW) {
-  DrawCenteredText("RAY TTT", 30, 60, (Color){255, 0, 200, 255}, screenW);
+  const char *left = "Ray ";
+  const char *right = "TTT";
+
+  int fontSize = 60;
+
+  // Compute widths
+  int leftWidth = MeasureText(left, fontSize);
+  int rightWidth = MeasureText(right, fontSize);
+  int totalWidth = leftWidth + rightWidth;
+
+  // Starting X so the whole thing is centered
+  int startX = (screenW - totalWidth) / 2;
+  int y = 30;
+
+  DrawText(left, startX, y, fontSize, (Color){255, 0, 200, 255}); // Pink
+  DrawText(right, startX + leftWidth, y, fontSize,
+           (Color){0, 255, 100, 255}); // Green
   DrawCenteredText("a c++ tictactoe", 90, 20, GRAY, screenW);
 }
 
@@ -92,12 +108,9 @@ void DrawStatusText(int screenW) {
     DrawCenteredText(current == 1 ? "PLAYER X'S TURN" : "PLAYER O'S TURN", 682,
                      25, WHITE, screenW);
   else if (winner == 1)
-    DrawCenteredText("X WINS! PRESS R", 662, 25, (Color){255, 0, 200, 255},
-                     screenW);
+    DrawCenteredText("X WINS!", 662, 25, (Color){255, 0, 200, 255}, screenW);
   else if (winner == 2)
-    DrawCenteredText("O WINS! PRESS R", 662, 25, (Color){0, 255, 100, 255},
-                     screenW);
+    DrawCenteredText("O WINS!", 662, 25, (Color){0, 255, 100, 255}, screenW);
   else
-    DrawCenteredText("DRAW! PRESS R", 662, 25, (Color){251, 113, 0, 255},
-                     screenW);
+    DrawCenteredText("DRAW!", 662, 25, (Color){251, 113, 0, 255}, screenW);
 }
