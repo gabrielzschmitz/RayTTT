@@ -25,7 +25,7 @@
       html {
         height: 100%;
         width: 100%;
-        background: #1a1f2e; /* your background color */
+        background: #252b3a;
         font-family: "Orbitron", monospace;
         display: flex;
         align-items: center;
@@ -39,7 +39,7 @@
         background: #111;
         image-rendering: pixelated;
         width: 100%;
-        max-width: 650px; /* or whatever your max size */
+        max-width: 650px;
         height: auto;
         display: block;
       }
@@ -53,33 +53,6 @@
       tabindex="-1"
     ></canvas>
 
-    <script type="text/javascript">
-      const wrapper = document.getElementById("game-wrapper");
-      const btn = document.getElementById("toggle-fs");
-
-      let isFS = false;
-
-      btn.onclick = () => {
-        isFS = !isFS;
-
-        if (isFS) {
-          wrapper.classList.add("fs");
-          btn.textContent = "Exit Fullscreen";
-        } else {
-          wrapper.classList.remove("fs");
-          btn.textContent = "⛶";
-        }
-      };
-
-      // ESC exits
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && isFS) {
-          wrapper.classList.remove("fs");
-          isFS = false;
-          btn.textContent = "⛶";
-        }
-      });
-    </script>
     <script type="text/javascript">
       var progressElement = document.getElementById("progress");
       var progressFill = document.getElementById("progress-fill");
@@ -120,25 +93,6 @@
       Module = Module || {};
       Module.requestFullscreen = () => {};
       Module.setCanvasSize = () => {};
-    </script>
-    <script>
-      (function () {
-        const canvas = document.getElementById("canvas");
-
-        function fixMouse(e) {
-          const rect = canvas.getBoundingClientRect();
-
-          const scaleX = canvas.width / rect.width;
-          const scaleY = canvas.height / rect.height;
-
-          e.clientX = (e.clientX - rect.left) * scaleX;
-          e.clientY = (e.clientY - rect.top) * scaleY;
-        }
-
-        window.addEventListener("mousemove", fixMouse, true);
-        window.addEventListener("mousedown", fixMouse, true);
-        window.addEventListener("mouseup", fixMouse, true);
-      })();
     </script>
     {{{ SCRIPT }}}
   </body>
