@@ -420,7 +420,10 @@ postbuildcommands({
 -- Windows
 filter({ "system:windows" })
 postbuildcommands({
-	'cmd /c copy /Y "..\\..\\resources\\icon.png" "%{cfg.targetdir}\\icon.png"',
+	('cmd /c copy /Y "%s\\resources\\icon.png" "%%{cfg.targetdir}\\icon.png"'):format(
+		os.getenv("GITHUB_WORKSPACE") or ".."
+	),
 })
+filter({})
 
 filter({})
