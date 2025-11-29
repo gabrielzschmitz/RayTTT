@@ -37,6 +37,11 @@ newoption({
 	default = "off",
 })
 
+newoption({
+	trigger = "with-emscripten",
+	description = "Build for web using Emscripten",
+})
+
 function download_progress(total, current)
 	local ratio = current / total
 	ratio = math.min(math.max(ratio, 0), 1)
@@ -68,7 +73,10 @@ function build_externals()
 end
 
 function platform_defines()
-	filter({ "options:backend=glfw" })
+	filter({ "options:with-emscripten" })
+	defines({ "PLATFORM_WEB" })
+
+	filter({ "options:backend=glfw", "options:not with-emscripten" })
 	defines({ "PLATFORM_DESKTOP" })
 
 	filter({ "options:backend=rgfw" })
@@ -132,9 +140,14 @@ end
 workspace(workspaceName)
 location("../")
 configurations({ "Debug", "Release" })
-platforms({ "x64", "x86", "ARM64" })
 
+filter({ "options:not with-emscripten" })
+platforms({ "x64", "x86", "ARM64" })
 defaultplatform("x64")
+
+filter({ "options:with-emscripten" })
+platforms({ "Web" })
+defaultplatform("Web")
 
 filter("configurations:Debug")
 defines({ "DEBUG" })
@@ -168,7 +181,39 @@ kind("ConsoleApp")
 location("build_files/")
 targetdir("../bin/%{cfg.buildcfg}")
 
-filter({ "system:windows", "configurations:Release", "action:gmake*" })
+-- Emscripten Web Build Configuration
+filter({ "options:with-emscripten" })
+kind("ConsoleApp")
+targetextension(".html")
+buildoptions({
+	"-sGL_ENABLE_GET_PROC_ADDRESS",
+})
+linkoptions({
+	"-s USE_GLFW=3",
+	"-s ASYNCIFY",
+	"-s TOTAL_MEMORY=67108864",
+	"-s FORCE_FILESYSTEM=1",
+	"-s ALLOW_MEMORY_GROWTH=1",
+	"-s EXPORTED_FUNCTIONS=['_main']",
+	"-s EXPORTED_RUNTIME_METHODS=ccall",
+	"-s OFFSCREENCANVAS_SUPPORT=1 ",
+	"-s GL_EMULATE_GLES_VERSION_STRING_FORMAT=1 ",
+	"--no-heap-copy",
+	"--preload-file ../../resources@/resources",
+	"--shell-file ../../src/index.html",
+	"-s FULL_ES2=1",
+	"-sGL_ENABLE_GET_PROC_ADDRESS",
+})
+
+filter({ "options:with-emscripten", "configurations:Release" })
+buildoptions({ "-Os" })
+linkoptions({ "-Os" })
+
+filter({ "options:with-emscripten", "configurations:Debug" })
+buildoptions({ "-g" })
+linkoptions({ "-g", "-s ASSERTIONS=1" })
+
+filter({ "system:windows", "configurations:Release", "action:gmake*", "options:not with-emscripten" })
 kind("WindowedApp")
 buildoptions({ "-Wl,--subsystem,windows" })
 
@@ -191,7 +236,20 @@ vpaths({
 
 files({ "../src/**.c", "../src/**.cpp", "../src/**.h", "../src/**.hpp", "../include/**.h", "../include/**.hpp" })
 
-filter({ "system:windows", "action:vs*" })
+-- For web builds, include raylib source files directly
+filter({ "options:with-emscripten" })
+files({
+	raylib_dir .. "/src/rcore.c",
+	raylib_dir .. "/src/rshapes.c",
+	raylib_dir .. "/src/rtextures.c",
+	raylib_dir .. "/src/rtext.c",
+	raylib_dir .. "/src/rmodels.c",
+	raylib_dir .. "/src/utils.c",
+	raylib_dir .. "/src/raudio.c",
+})
+defines({ "PLATFORM_WEB" })
+
+filter({ "system:windows", "action:vs*", "options:not with-emscripten" })
 files({ "../src/*.rc", "../src/*.ico" })
 
 filter({})
@@ -199,10 +257,20 @@ filter({})
 includedirs({ "../src" })
 includedirs({ "../include" })
 
+filter({ "options:not with-emscripten" })
 links({ "raylib" })
 
+filter({})
+
+filter({ "options:with-emscripten" })
+cdialect("gnu17")
+cppdialect("gnu++17")
+
+filter({ "options:not with-emscripten" })
 cdialect("C17")
 cppdialect("C++17")
+
+filter({})
 
 includedirs({ raylib_dir .. "/src" })
 
@@ -216,21 +284,21 @@ links({ "raylib.lib" })
 characterset("Unicode")
 buildoptions({ "/Zc:__cplusplus" })
 
-filter("system:windows")
+filter({ "system:windows", "options:not with-emscripten" })
 defines({ "_WIN32" })
 links({ "winmm", "gdi32", "opengl32" })
 libdirs({ "../bin/%{cfg.buildcfg}" })
 
-filter("system:linux")
+filter({ "system:linux", "options:not with-emscripten" })
 links({ "pthread", "m", "dl", "rt" })
 
-filter({ "system:linux", "options:wayland=off" })
+filter({ "system:linux", "options:wayland=off", "options:not with-emscripten" })
 links({ "X11" })
 
-filter({ "system:linux", "options:wayland=on" })
+filter({ "system:linux", "options:wayland=on", "options:not with-emscripten" })
 links({ "wayland-client", "wayland-cursor", "wayland-egl", "xkbcommon" })
 
-filter("system:macosx")
+filter({ "system:macosx", "options:not with-emscripten" })
 links({
 	"OpenGL.framework",
 	"Cocoa.framework",
@@ -243,97 +311,106 @@ links({
 
 filter({})
 
-project("raylib")
-kind("StaticLib")
+-- Only build raylib library for non-web builds
+if not _OPTIONS["with-emscripten"] then
+	group("Dependencies")
 
-platform_defines()
+	project("raylib")
+	kind("StaticLib")
 
-location("build_files/")
+	platform_defines()
 
-language("C")
-targetdir("../bin/%{cfg.buildcfg}")
+	location("build_files/")
 
-filter({ "options:wayland=on" })
-defines({ "GLFW_LINUX_ENABLE_WAYLAND=TRUE" })
+	language("C")
+	targetdir("../bin/%{cfg.buildcfg}")
 
-filter({ "options:wayland=on", "system:linux" })
-prebuildcommands({
-	"@echo Generating Wayland protocols...",
-	-- Core Wayland & Shell
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/wayland.xml ../"
-		.. raylib_dir
-		.. "/src/wayland-client-protocol.h",
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/xdg-shell.xml ../"
-		.. raylib_dir
-		.. "/src/xdg-shell-client-protocol.h",
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/xdg-decoration-unstable-v1.xml ../"
-		.. raylib_dir
-		.. "/src/xdg-decoration-unstable-v1-client-protocol.h",
+	filter({ "options:wayland=on" })
+	defines({ "GLFW_LINUX_ENABLE_WAYLAND=TRUE" })
 
-	-- Viewporter
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/viewporter.xml ../"
-		.. raylib_dir
-		.. "/src/viewporter-client-protocol.h",
+	filter({ "options:wayland=on", "system:linux" })
+	prebuildcommands({
+		"@echo Generating Wayland protocols...",
+		-- Core Wayland & Shell
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/wayland.xml ../"
+			.. raylib_dir
+			.. "/src/wayland-client-protocol.h",
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/xdg-shell.xml ../"
+			.. raylib_dir
+			.. "/src/xdg-shell-client-protocol.h",
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/xdg-decoration-unstable-v1.xml ../"
+			.. raylib_dir
+			.. "/src/xdg-decoration-unstable-v1-client-protocol.h",
 
-	-- Relative Pointer
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/relative-pointer-unstable-v1.xml ../"
-		.. raylib_dir
-		.. "/src/relative-pointer-unstable-v1-client-protocol.h",
-	-- Pointer Constraints
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/pointer-constraints-unstable-v1.xml ../"
-		.. raylib_dir
-		.. "/src/pointer-constraints-unstable-v1-client-protocol.h",
+		-- Viewporter
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/viewporter.xml ../"
+			.. raylib_dir
+			.. "/src/viewporter-client-protocol.h",
 
-	-- Fractional Scale
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/fractional-scale-v1.xml ../"
-		.. raylib_dir
-		.. "/src/fractional-scale-v1-client-protocol.h",
+		-- Relative Pointer
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/relative-pointer-unstable-v1.xml ../"
+			.. raylib_dir
+			.. "/src/relative-pointer-unstable-v1-client-protocol.h",
+		-- Pointer Constraints
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/pointer-constraints-unstable-v1.xml ../"
+			.. raylib_dir
+			.. "/src/pointer-constraints-unstable-v1-client-protocol.h",
 
-	-- XDG Activation
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/xdg-activation-v1.xml ../"
-		.. raylib_dir
-		.. "/src/xdg-activation-v1-client-protocol.h",
-	-- Idle Inhibit
-	"@wayland-scanner client-header ../"
-		.. raylib_dir
-		.. "/src/external/glfw/deps/wayland/idle-inhibit-unstable-v1.xml ../"
-		.. raylib_dir
-		.. "/src/idle-inhibit-unstable-v1-client-protocol.h",
+		-- Fractional Scale
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/fractional-scale-v1.xml ../"
+			.. raylib_dir
+			.. "/src/fractional-scale-v1-client-protocol.h",
+
+		-- XDG Activation
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/xdg-activation-v1.xml ../"
+			.. raylib_dir
+			.. "/src/xdg-activation-v1-client-protocol.h",
+		-- Idle Inhibit
+		"@wayland-scanner client-header ../"
+			.. raylib_dir
+			.. "/src/external/glfw/deps/wayland/idle-inhibit-unstable-v1.xml ../"
+			.. raylib_dir
+			.. "/src/idle-inhibit-unstable-v1-client-protocol.h",
+	})
+	filter({})
+
+	filter("action:vs*")
+	defines({ "_WINSOCK_DEPRECATED_NO_WARNINGS", "_CRT_SECURE_NO_WARNINGS" })
+	characterset("Unicode")
+	buildoptions({ "/Zc:__cplusplus" })
+	filter({})
+
+	includedirs({ raylib_dir .. "/src", raylib_dir .. "/src/external/glfw/include" })
+	vpaths({
+		["Header Files"] = { raylib_dir .. "/src/**.h" },
+		["Source Files/*"] = { raylib_dir .. "/src/**.c" },
+	})
+	files({ raylib_dir .. "/src/*.h", raylib_dir .. "/src/*.c" })
+
+	removefiles({ raylib_dir .. "/src/rcore_*.c" })
+
+	filter({ "system:macosx", "files:" .. raylib_dir .. "/src/rglfw.c" })
+	compileas("Objective-C")
+
+	filter({})
+end
+
+postbuildcommands({
+	"{COPY} ../../resources/icon.png %{cfg.targetdir}/icon.png",
 })
-filter({})
-
-filter("action:vs*")
-defines({ "_WINSOCK_DEPRECATED_NO_WARNINGS", "_CRT_SECURE_NO_WARNINGS" })
-characterset("Unicode")
-buildoptions({ "/Zc:__cplusplus" })
-filter({})
-
-includedirs({ raylib_dir .. "/src", raylib_dir .. "/src/external/glfw/include" })
-vpaths({
-	["Header Files"] = { raylib_dir .. "/src/**.h" },
-	["Source Files/*"] = { raylib_dir .. "/src/**.c" },
-})
-files({ raylib_dir .. "/src/*.h", raylib_dir .. "/src/*.c" })
-
-removefiles({ raylib_dir .. "/src/rcore_*.c" })
-
-filter({ "system:macosx", "files:" .. raylib_dir .. "/src/rglfw.c" })
-compileas("Objective-C")
-
-filter({})
