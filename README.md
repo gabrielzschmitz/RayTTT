@@ -41,8 +41,18 @@ run the game.
     <img src="./resources/demoweb.png" alt="Demo Web" height="500" style="margin-right: 1rem; border-radius: 8px;">
 </p>
 <p align="center">
-    <i>Desktop and web version of the game in action</i>
+    <i>Desktop and Web version of the game in action</i>
 </p>
+
+## Itch.io Page
+
+RayTTT also has its own **Itch.io page**, where you can try the browser version
+instantly or download the desktop builds. The page includes a short
+description, and an embedded web build so you can test the game with a single
+click.
+
+**Play now on Itch.io:**
+[https://gabrielzschmitz.itch.io/rayttt](https://gabrielzschmitz.itch.io/rayttt)
 
 ## License
 
